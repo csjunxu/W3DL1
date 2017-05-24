@@ -10,7 +10,7 @@ im_num = length(im_dir);
 nSig = 40;
 Par.ps = 8;
 Par.win = 30;
-Par.step = 3;
+Par.step = 7;
 
 Par.outerIter = 12;
 Par.innerIter = 2;

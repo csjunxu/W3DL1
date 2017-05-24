@@ -1,12 +1,21 @@
 function  [C] =  W3DL1_ADMM( Y, D, S, W1, W2, Par )
 % This routine solves the following weighted nuclear norm optimization problem with column weights,
 %
-% min |W1(Y-DSC)W2|_1 + |Z|_1 s.t.  C=Z
+% min |W1(Y-DSC)W2|_1 + |C|_1 
 % inputs:
 %        Y -- d*M data matrix, d is the data dimension, and M is the number
 %             of image patches.
+%        D   -- The adaptive dictionary
+%        S    -- The adaptive singular values 
 %        W1 -- d*d matrix of column weights
 %        W2 -- M*M matrix of column weights
+%        W3 --  W3 = S
+%        Par -- parameters
+% Output:
+%        C    -- The sparse coding coefficient matrix
+
+
+
 
 tol = 1e-3;
 Par.maxrho = 100;
@@ -40,27 +49,39 @@ while iter < Par.maxIter
     CC = (S' * D' * W1 * (W1 * Y * diag(W2) - E - 1/Par.rho * Delta) * diag(W2) + C - 1/Par.rho * delta) * BB;
     A = sylvester(AA, BB, CC);
     
-    %     % faster solution
-    %     [Ua, Sa, ~] = svd(A);
-    %     I1 = eye(size(A, 2));
-    %     I2 = eye(size(B, 1));
-    %     K = kron(I1, A) + kron(B', I2);
-    %     invK = 1./diag(K);
-    %
-    %     UTE = Ua'*E;
-    %     vecUTE = UTE(:);
-    %
-    %     vecUTC = invK .* vecUTE;
-    %     MatvecUTC = reshape(vecUTC, [size(UTE, 1) size(UTE, 2)]);
-    %     C = Ua*MatvecUTC;
+%     % faster solution when W1 = I
+%     AA = diag(diag(S).^2);
+%     BB = diag(1./(W2.^2));
+%     I1 = eye(size(AA, 2));
+%     I2 = eye(size(BB, 1));
+%     K = kron(I2, AA) + kron(BB', I1);
+%     invK = 1./diag(K);
+%     UTCC = Ua'*CC;
+%     vecUTCC = UTCC(:);
+%     vecUTA = invK .* vecUTCC;
+%     MatvecUTA = reshape(vecUTA, [size(UTCC, 1) size(UTCC, 2)]);
+%     A = Ua*MatvecUTA;
+
+%     % faster solution
+%     AA = S' * D' * diag(diag(W1).^2) * D * S;
+%     [Ua, Sa, ~] = svd(AA);
+%     I1 = eye(size(AA, 2));
+%     I2 = eye(size(BB, 1));
+%     K = kron(I2, Sa) + kron(BB', I1);
+%     invK = 1./diag(K);
+%     UTCC = Ua'*CC;
+%     vecUTCC = UTCC(:);
+%     vecUTA = invK .* vecUTCC;
+%     MatvecUTA = reshape(vecUTA, [size(UTE, 1) size(UTCC, 2)]);
+%     A = Ua*MatvecUTA;
     
     %% update C, fix A and E
-    % min_{Z} 0.5 * rho * ||Z - (C + 1/rho * U)||_F^2 + ||Z||_1
+    % min_{C} 0.5 * ||(A + 1/rho * delta) - C||_F^2 + 1/rho * ||C||_1
     Temp1 = A + delta/Par.rho;
     C = sign(Temp1) .* max( abs(Temp1) - 1/Par.rho, 0 );
     
     %% update E, fix A and C
-    % min_{Z} 0.5 * rho * ||Z - (C + 1/rho * U)||_F^2 + ||Z||_1
+    % min_{E} 0.5 * ||[W1 * (Y - D * S * A) * W2 - 1/rho * Delta] - E||_F^2 + 1/rho * ||E||_1
     Temp2 = W1 * (Y - D * S * A) * diag(W2);
     Temp3 = Temp2 - Delta/Par.rho;
     E = sign(Temp3) .* max( abs(Temp3) - 1/Par.rho, 0 );
