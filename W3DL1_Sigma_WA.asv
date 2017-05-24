@@ -47,7 +47,7 @@ for ite  =  1 : Par.outerIter
         if Par.lambda1 == 0
             W1 = eye(size(Y, 1));
             S = diag(S);
-            % min |C|_1 + |E|_1  s.t.  A = C, E = (Y-DSC)W2
+            % min |C|_1 + |E|_1  s.t.  A = C, E = (Y-DSC)W2 
             C = W3DL1_ADMM( nDCnlY, D, S, W1, W2, Par );
             % update Y
             nDCnlYhat = D * S * C;

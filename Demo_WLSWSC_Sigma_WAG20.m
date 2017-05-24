@@ -7,12 +7,12 @@ im_dir  = dir(fpath);
 im_num = length(im_dir);
 
 
-nSig = 20;
+nSig = 40;
 Par.ps = 8;
 Par.win = 30;
 Par.step = 3;
 
-Par.outerIter = 10;
+Par.outerIter = 12;
 Par.innerIter = 2;
 
 for nlspini = [70]
@@ -21,9 +21,9 @@ for nlspini = [70]
         Par.lambda1 = lambda1;
         for nlspgap = [10]
             Par.nlspgap = nlspgap;
-            for delta = [0.05 0.03]
+            for delta = [0.05]
                 Par.delta = delta;
-                for lambda2 = [0.84 0.82 0.8]
+                for lambda2 = [0.8 0.7 0.6 0.5]
                     Par.lambda2 = lambda2;
                     % record all the results in each iteration
                     Par.PSNR = zeros(Par.outerIter, im_num, 'double');
@@ -53,7 +53,7 @@ for nlspini = [70]
                             T256 = [T256 etime(clock,time0)];
                             fprintf('Total elapsed time = %f s\n', (etime(clock,time0)) );
                         end
-                        im_out(im_out>1)=1; 
+                        im_out(im_out>1)=1;
                         im_out(im_out<0)=0;
                         % calculate the PSNR
                         Par.PSNR(Par.outerIter, Par.image)  =   csnr( im_out*255, Par.I*255, 0, 0 );
@@ -73,7 +73,7 @@ for nlspini = [70]
                     sT256 = std(T256);
                     fprintf('The best PSNR result is at %d iteration. \n',idx);
                     fprintf('The average PSNR = %2.4f, SSIM = %2.4f. \n', mPSNR(idx),mSSIM);
-                    name = sprintf(['WLSWSC_Sigma_WAG_' Sdir{end-1} '_nSig' num2str(nSig) '_ps' num2str(Par.ps) '_step' num2str(Par.step) '_nlspini' num2str(Par.nlspini) '_nlspgap' num2str(Par.nlspgap) '_delta' num2str(delta) '_l1' num2str(lambda1) '_l2' num2str(lambda2) '.mat']);
+                    name = sprintf(['W3DL1_Sigma_WAG_' Sdir{end-1} '_nSig' num2str(nSig) '_ps' num2str(Par.ps) '_step' num2str(Par.step) '_nlspini' num2str(Par.nlspini) '_nlspgap' num2str(Par.nlspgap) '_delta' num2str(delta) '_l1' num2str(lambda1) '_l2' num2str(lambda2) '.mat']);
                     save(name,'nSig','PSNR','SSIM','mPSNR','mSSIM','mT512','sT512','mT256','sT256');
                 end
             end
