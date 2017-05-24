@@ -15,7 +15,7 @@ Par.step = 3;
 Par.outerIter = 12;
 Par.innerIter = 2;
 
-for nlspini = [70]
+for nlspini = [90]
     Par.nlspini = nlspini;
     for lambda1 = [0]
         Par.lambda1 = lambda1;

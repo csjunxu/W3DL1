@@ -8,11 +8,11 @@ function  [C] =  W3DL1_ADMM( Y, D, S, W1, W2, Par )
 %        W1 -- d*d matrix of column weights
 %        W2 -- M*M matrix of column weights
 
-tol = 1e-8;
+tol = 1e-3;
 Par.maxrho = 100;
 Par.rho = 0.5;
 Par.mu = 1.1;
-Par.display = 1;
+Par.display = 0;
 Par.maxIter = 100;
 % Initializing optimization variables
 C = zeros(size(S, 1), size(Y, 2));
@@ -72,14 +72,14 @@ while iter < Par.maxIter
     stopEW(iter) = max(max(abs(E - Temp2)));
     stopE(iter) = max(max(abs(E - Epre)));
     if Par.display %&& (iter==1 || mod(iter,10)==0 || stopC<tol)
-        disp(['iter ' num2str(iter) ', mu=' num2str(Par.mu,'%2.1e') ...
+        disp(['iter ' num2str(iter) ', rho=' num2str(Par.rho,'%2.1e') ...
             ', max(||A-C||)=' num2str(stopCA(iter),'%2.3e') ...
             ', max(||A-Apre||)=' num2str(stopA(iter),'%2.3e') ...
             ', max(||C-Cpre||)=' num2str(stopC(iter),'%2.3e') ...
             ', max(||E-W1(Y - DSA)W2||)=' num2str(stopEW(iter),'%2.3e') ...
             ', max(||E-Epre||)=' num2str(stopE(iter),'%2.3e')]);
     end
-    if stopCA(iter) < tol && stopC(iter) < tol && stopA(iter) < tol
+    if stopCA(iter) < tol && stopC(iter) < tol && stopA(iter) < tol && stopEW(iter) < tol && stopE(iter) < tol
         break;
     else
         %% update the augmented multipliers Delta, delta
